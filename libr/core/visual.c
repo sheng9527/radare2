@@ -190,10 +190,10 @@ static const char *__core_visual_print_command (RCore *core) {
 }
 
 static const char *help_msg_visual[] = {
-	"$", "set the program counter to the current offset + cursor",
 	"?", "show visual help menu",
 	"??", "show this help",
 	"???", "show the user-friendly hud",
+	"$", "set the program counter to the current offset + cursor",
 	"%", "in cursor mode finds matching pair, otherwise toggle autoblocksz",
 	"^", "seek to the begining of the function",
 	"!", "enter into the visual panels mode",
