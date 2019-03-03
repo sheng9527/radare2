@@ -195,6 +195,11 @@ static void rasm2_list(RCore *core, const char *arch, int fmt) {
 	}
 }
 
+static inline void __setshowrefptr(RConfig *cfg, const char *asmarch, int asmbits) {
+	int show_refptr = (strncmp (asmarch, "x86", 3));
+	r_config_set (cfg, "asm.cmt.refptr", r_str_bool (show_refptr));
+}
+
 static inline void __setsegoff(RConfig *cfg, const char *asmarch, int asmbits) {
 	int autoseg = (!strncmp (asmarch, "x86", 3) && asmbits == 16);
 	r_config_set (cfg, "asm.segoff", r_str_bool (autoseg));
@@ -553,7 +558,7 @@ static int cb_asmarch(void *user, void *data) {
 	//if (!strcmp (node->value, "bf"))
 	//	r_config_set (core->config, "dbg.backend", "bf");
 	__setsegoff (core->config, node->value, core->assembler->bits);
-
+	__setshowrefptr (core->config, node->value, core->assembler->bits);
 	// set a default endianness
 	int bigbin = r_bin_is_big_endian (core->bin);
 	if (bigbin == -1 /* error: no endianness detected in binary */) {
@@ -2727,7 +2732,6 @@ R_API int r_core_config_init(RCore *core) {
 	SETPREF ("asm.nodup", "false", "Do not show dupped instructions (collapse disasm)");
 	SETPREF ("asm.emu", "false", "Run ESIL emulation analysis on disasm");
 	SETPREF ("emu.pre", "false", "Run ESIL emulation starting at the closest flag in pd");
-	SETPREF ("asm.refptr", "false", "Show refpointer information in disasm");
 	SETPREF ("emu.lazy", "false", "Do not emulate all instructions with aae (optimization)");
 	SETPREF ("emu.stack", "false", "Create a temporary fake stack when emulating in disasm (asm.emu)");
 	SETCB ("emu.str", "false", &cb_emustr, "Show only strings if any in the asm.emu output");
@@ -2814,6 +2818,7 @@ R_API int r_core_config_init(RCore *core) {
 	update_asmfeatures_options (core, n);
 	SETCB ("asm.parser", "x86.pseudo", &cb_asmparser, "Set the asm parser to use");
 	SETCB ("asm.segoff", "false", &cb_segoff, "Show segmented address in prompt (x86-16)");
+	SETPREF ("asm.cmt.refptr", "true", "Show refpointer information in disasm");
 	SETCB ("asm.decoff", "false", &cb_decoff, "Show segmented address in prompt (x86-16)");
 	SETICB ("asm.seggrn", 4, &cb_seggrn, "Segment granularity in bits (x86-16)");
 	n = NODECB ("asm.syntax", "intel", &cb_asmsyntax);

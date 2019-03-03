@@ -673,7 +673,7 @@ static RDisasmState * ds_init(RCore *core) {
 	ds->asm_hint_pos = r_config_get_i (core->config, "asm.hint.pos");
 	ds->asm_hints = r_config_get_i (core->config, "asm.hints"); // only for cdiv wtf
 	ds->show_slow = r_config_get_i (core->config, "asm.slow");
-	ds->show_refptr = r_config_get_i (core->config, "asm.refptr");
+	ds->show_refptr = r_config_get_i (core->config, "asm.cmt.refptr");
 	ds->show_calls = r_config_get_i (core->config, "asm.calls");
 	ds->show_family = r_config_get_i (core->config, "asm.family");
 	ds->cmtcol = r_config_get_i (core->config, "asm.cmt.col");
