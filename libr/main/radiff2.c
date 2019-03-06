@@ -4,14 +4,12 @@
 #include <r_core.h>
 #include <r_hash.h>
 #include <limits.h>
-#include <getopt.c>
+#include <r_main.h>
 #ifdef _MSC_VER
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #endif
-
-#include "../blob/version.c"
 
 enum {
 	MODE_DIFF,
@@ -687,7 +685,7 @@ static ut8 *get_strings(RCore *c, int *len) {
 	return buf;
 }
 
-int main(int argc, char **argv) {
+R_API int r_main_radiff2(int argc, char **argv) {
 	const char *columnSort = NULL;
 	const char *addr = NULL;
 	RCore *c = NULL, *c2 = NULL;
@@ -786,7 +784,7 @@ int main(int argc, char **argv) {
 			diffmode = 'U';
 			break;
 		case 'v':
-			return blob_version ("radiff2");
+			return r_main_version ("radiff2");
 		case 'q':
 			quiet = true;
 			break;

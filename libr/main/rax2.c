@@ -1,15 +1,15 @@
-/* radare - LGPL - Copyright 2007-2018 - pancake */
+/* radare - LGPL - Copyright 2007-2019 - pancake */
 
-#include "../blob/version.c"
+#include <r_main.h>
 #include <r_util.h>
 #include <r_util/r_print.h>
 
+// dont use fixed sized buffers
 #define STDIN_BUFFER_SIZE 354096
-#define R_STATIC_ASSERT(x)\
-	switch (0) {\
-	case 0:\
-	case (x):;\
-	}
+
+// avoid globals and create new/free model
+typedef struct r_main_rax2 {
+} RMainRax2;
 
 static RNum *num;
 static int help();
@@ -173,7 +173,7 @@ static int rax(char *str, int len, int last) {
 			case 'L': flags ^= 1 << 19; break;
 			case 'i': flags ^= 1 << 21; break;
 			case 'o': flags ^= 1 << 22; break;
-			case 'v': return blob_version ("rax2");
+			case 'v': return r_main_version ("rax2");
 			case '\0': return !use_stdin ();
 			default:
 				/* not as complete as for positive numbers */
@@ -596,7 +596,7 @@ static int use_stdin() {
 	return 0;
 }
 
-R_API int r_core_main_rax2(int argc, char **argv) {
+R_API int r_main_rax2(int argc, char **argv) {
 	int i;
 	num = r_num_new (NULL, NULL, NULL);
 	if (argc == 1) {
@@ -610,9 +610,4 @@ R_API int r_core_main_rax2(int argc, char **argv) {
 	r_num_free (num);
 	num = NULL;
 	return 0;
-}
-
-
-int main(int argc, char **argv) {
-	return r_core_main_rax2 (argc, argv);
 }

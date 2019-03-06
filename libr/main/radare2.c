@@ -1,4 +1,4 @@
-/* radare - LGPL - Copyright 2009-2018 - pancake */
+/* radare - LGPL - Copyright 2009-2019 - pancake */
 
 #define USE_THREADS 1
 #define ALLOW_THREADED 0
@@ -12,14 +12,14 @@
 #include <r_th.h>
 #include <r_io.h>
 #include <stdio.h>
-#include <getopt.c>
 #include <r_core.h>
-#include "../blob/version.c"
+#include <r_main.h>
 
 
 #if USE_THREADS
 static char *rabin_cmd = NULL;
 #endif
+static RThread *thread = NULL;
 static bool threaded = false;
 static bool haveRarunProfile = false;
 static struct r_core_t r;
@@ -32,39 +32,13 @@ static bool is_valid_gdb_file(RCoreFile *fh) {
 
 static char* get_file_in_cur_dir(const char *filepath) {
 	filepath = r_file_basename (filepath);
-	if (r_file_exists (filepath)
-	    && !r_file_is_directory (filepath)) {
+	if (r_file_exists (filepath) && !r_file_is_directory (filepath)) {
 		return r_file_abspath (filepath);
 	}
 	return NULL;
 }
 
-static RThread *thread = NULL;
-
-static RThreadFunctionRet loading_thread(RThread *th) {
-	const char *tok = "\\|/-";
-	int i = 0;
-	if (th) {
-		while (!th->breaked) {
-			eprintf ("%c] Loading..%c     \r[", tok[i%4], "."[i%2]);
-			r_sys_usleep (100000);
-			i++;
-		}
-	}
-	return R_TH_STOP;
-}
-
-static void loading_start() {
-	thread = r_th_new (loading_thread, NULL, 1);
-	r_th_start (thread, true);
-}
-
-static void loading_stop() {
-	r_th_kill_free (thread);
-	thread = NULL;
-}
-
-static int verify_version(int show) {
+static int r_main_version_verify(int show) {
 	int i, ret;
 	typedef const char* (*vc)();
 	const char *base = R2_GITTAP;
@@ -120,6 +94,29 @@ static int verify_version(int show) {
 		}
 	}
 	return ret;
+}
+
+static RThreadFunctionRet loading_thread(RThread *th) {
+	const char *tok = "\\|/-";
+	int i = 0;
+	if (th) {
+		while (!th->breaked) {
+			eprintf ("%c] Loading..%c     \r[", tok[i%4], "."[i%2]);
+			r_sys_usleep (100000);
+			i++;
+		}
+	}
+	return R_TH_STOP;
+}
+
+static void loading_start() {
+	thread = r_th_new (loading_thread, NULL, 1);
+	r_th_start (thread, true);
+}
+
+static void loading_stop() {
+	r_th_kill_free (thread);
+	thread = NULL;
 }
 
 static int main_help(int line) {
@@ -421,49 +418,7 @@ static void set_color_default(void) {
 	free (tmp);
 }
 
-#if EMSCRIPTEN
-#include <emscripten.h>
-static RCore *core = NULL;
-
-void *r2_asmjs_new(const char *cmd) {
-	return r_core_new ();
-}
-
-void r2_asmjs_free(void *core) {
-	r_core_free (core);
-}
-
-char *r2_asmjs_cmd(void *kore, const char *cmd) {
-	if (kore) {
-		if (!cmd) {
-			r_core_free (kore);
-		}
-	} else {
-		if (core) {
-			kore = core;
-		} else {
-			kore = core = r_core_new ();
-		}
-	}
-	return r_core_cmd_str (kore, cmd);
-}
-
-static void wget_cb(const char *f) {
-	r_core_cmdf (core, "o %s", f);
-}
-
-void r2_asmjs_openurl(void *kore, const char *url) {
-	const char *file = r_str_lchr (url, '/');
-	if (kore) {
-		core = kore;
-	}
-	if (file) {
-		emscripten_async_wget (url, file + 1, wget_cb, NULL);
-	}
-}
-
-#else // EMSCRIPTEN
-int main(int argc, char **argv, char **envp) {
+R_API int r_main_radare2(int argc, char **argv, char **envp) {
 #if USE_THREADS
 	RThreadLock *lock = NULL;
 	RThread *rabin_th = NULL;
@@ -727,12 +682,12 @@ int main(int argc, char **argv, char **envp) {
 				LISTS_FREE ();
 				return 0;
 			} else {
-				verify_version (0);
+				r_main_version_verify (0);
 				LISTS_FREE ();
-				return blob_version ("radare2");
+				return r_main_version ("radare2");
 			}
 		case 'V':
-			return verify_version (1);
+			return r_main_version_verify (1);
 		case 'w':
 			perms |= R_PERM_W;
 			break;
@@ -1587,4 +1542,3 @@ beach:
 	LISTS_FREE ();
 	return ret;
 }
-#endif // EMSCRIPTEN
