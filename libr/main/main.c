@@ -21,7 +21,7 @@ static RMain foo[] = {
 R_API RMain *r_main_new (const char *name) {
 	int i = 0;
 	while (foo[i].name) {
-		if (strstr (name, foo[i].name)) {
+		if (!strcmp (name, foo[i].name)) {
 			RMain *m = R_NEW0 (RMain);
 			if (m) {
 				m->name = foo[i].name;
