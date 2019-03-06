@@ -418,7 +418,7 @@ static void set_color_default(void) {
 	free (tmp);
 }
 
-R_API int r_main_radare2(int argc, char **argv, char **envp) {
+R_API int r_main_radare2(int argc, char **argv) {
 #if USE_THREADS
 	RThreadLock *lock = NULL;
 	RThread *rabin_th = NULL;
@@ -478,7 +478,10 @@ R_API int r_main_radare2(int argc, char **argv, char **envp) {
 	r_signal_sigmask (SIG_BLOCK, &sigBlockMask, NULL);
 #endif
 
-	r_sys_set_environ (envp);
+	char **envp = r_sys_get_environ ();
+	if (envp) {
+		r_sys_set_environ (envp);
+	}
 
 	if ((tmp = r_sys_getenv ("R_DEBUG"))) {
 		r_sys_crash_handler ("gdb --pid %d");

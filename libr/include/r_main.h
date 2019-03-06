@@ -18,6 +18,7 @@ R_API int r_main_run(RMain *m, int argc, char **argv);
 R_API int r_main_version(const char *program);
 R_API int r_main_rax2(int argc, char **argv);
 R_API int r_main_rarun2(int argc, char **argv);
+R_API int r_main_radare2(int argc, char **argv);
 R_API int r_main_rasm2(int argc, char **argv);
 R_API int r_main_r2agent(int argc, char **argv);
 R_API int r_main_rabin2(int argc, char **argv);

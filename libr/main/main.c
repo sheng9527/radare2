@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <r_main.h>
+#include <r_util.h>
 
-static Main foo[] = {
+static RMain foo[] = {
 	{ "r2", r_main_radare2 },
 	{ "rax2", r_main_rax2 },
 	{ "radiff2", r_main_radiff2 },
@@ -20,11 +21,13 @@ static Main foo[] = {
 R_API RMain *r_main_new (const char *name) {
 	int i = 0;
 	while (foo[i].name) {
-		if (strstr (argv[0], foo[i].name)) {
-			RMain *main = R_NEW0 (main);
-			main->name = foo[i].name;
-			main->main = foo[i].main;
-			return main;
+		if (strstr (name, foo[i].name)) {
+			RMain *m = R_NEW0 (RMain);
+			if (m) {
+				m->name = foo[i].name;
+				m->main = foo[i].main;
+			}
+			return m;
 		}
 		i++;
 	}
